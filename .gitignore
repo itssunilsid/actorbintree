@@ -1,0 +1,12 @@
+project/project
+project/target
+target
+tmp
+dist
+.cache
+.sbtserver*
+.DS_Store
+.idea
+project.xcworkspace
+xcuserdata
+*.iml

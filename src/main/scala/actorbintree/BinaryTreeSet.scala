@@ -150,7 +150,10 @@ class BinaryTreeNode(val elem: Int, initiallyRemoved: Boolean) extends Actor {
           subtrees = subtrees + (Right -> newNode)
           requester ! OperationFinished(id)
         }
-      } else requester ! OperationFinished(id)
+      } else {
+        removed = false
+        requester ! OperationFinished(id)
+      }
 
     case Contains(requester: ActorRef, id: Int, containElem: Int) =>
       if(elem == containElem) requester ! ContainsResult(id, result = !removed)

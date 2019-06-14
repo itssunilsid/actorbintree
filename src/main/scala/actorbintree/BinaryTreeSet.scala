@@ -167,7 +167,8 @@ class BinaryTreeNode(val elem: Int, initiallyRemoved: Boolean) extends Actor {
 
     case CopyTo(treeNode: ActorRef) =>
       if(!removed) treeNode ! Insert(self, elem, elem)
-      context.become(copying(Set(treeNode), true))
+      subtrees foreach { case (_, child) => child ! CopyTo(treeNode) }
+      context.become(copying(subtrees.valuesIterator.toSet, insertConfirmed = !removed))
   }
 
   // optional
@@ -176,12 +177,20 @@ class BinaryTreeNode(val elem: Int, initiallyRemoved: Boolean) extends Actor {
     */
   def copying(expected: Set[ActorRef], insertConfirmed: Boolean): Receive = {
     case OperationFinished(id: Int) =>
-      subtrees foreach { case (_, child) => child ! CopyTo(expected.head) }
-      if(subtrees.isEmpty) self ! CopyFinished
+      context.become(copying(expected, insertConfirmed = true))
+      self ! CopyFinished
 
     case CopyFinished =>
-      context.parent ! CopyFinished
-      self ! PoisonPill
+      if(expected.isEmpty && insertConfirmed) {
+        context.parent ! CopyFinished
+        self ! PoisonPill
+      }
+      else {
+        //this will even work when subtree's didnt respond with any message
+        // and this node itself sends OperationFinished because I am are trying
+        // to remove self from expected which will not be there
+        context.become(copying(expected - sender(), insertConfirmed = true))
+      }
   }
 
 

@@ -168,7 +168,7 @@ class BinaryTreeNode(val elem: Int, initiallyRemoved: Boolean) extends Actor {
     case CopyTo(treeNode: ActorRef) =>
       if(!removed) treeNode ! Insert(self, elem, elem)
       subtrees foreach { case (_, child) => child ! CopyTo(treeNode) }
-      context.become(copying(subtrees.valuesIterator.toSet, insertConfirmed = !removed))
+      context.become(copying(subtrees.valuesIterator.toSet, insertConfirmed = removed))
   }
 
   // optional

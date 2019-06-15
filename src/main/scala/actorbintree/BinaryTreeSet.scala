@@ -182,13 +182,17 @@ class BinaryTreeNode(val elem: Int, initiallyRemoved: Boolean) extends Actor {
 
     case CopyFinished =>
       if(expected.isEmpty && insertConfirmed) {
+        // if node has no subtrees
+        context.parent ! CopyFinished
+        self ! PoisonPill
+      }
+      else if(expected.size == 1 && (expected contains sender()) && insertConfirmed) {
+        // if node has subtrees and will be sent only when all the subtrees replied
         context.parent ! CopyFinished
         self ! PoisonPill
       }
       else {
-        //this will even work when subtree's didnt respond with any message
-        // and this node itself sends OperationFinished because I am are trying
-        // to remove self from expected which will not be there
+        //if one of the subtree completes its copying
         context.become(copying(expected - sender(), insertConfirmed = true))
       }
   }

@@ -193,7 +193,7 @@ class BinaryTreeNode(val elem: Int, initiallyRemoved: Boolean) extends Actor {
       }
       else {
         //if one of the subtree completes its copying
-        context.become(copying(expected - sender(), insertConfirmed = true))
+        context.become(copying(expected - sender(), insertConfirmed))
       }
   }
 
